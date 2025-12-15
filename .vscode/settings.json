@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "GameProgProj.sln"
+    "dotnet.defaultSolution": "BIM449-Game-Programming-Final.sln"
 }
