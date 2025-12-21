@@ -20,7 +20,7 @@ public class Timer : MonoBehaviour
         set
         {
             _timeLeft = value;
-            timerText.text = "Time Remaining: " + Mathf.CeilToInt(_timeLeft).ToString();
+            timerText.text = "Time\n" + Mathf.CeilToInt(_timeLeft).ToString();
         }
     }
     
