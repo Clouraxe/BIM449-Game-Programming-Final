@@ -48,15 +48,12 @@ public class TeacherMovement : MonoBehaviour
             return;
         }
 
-        /* =======================
-           BEKLEME DURUMU
-        ======================= */
+        //Sleep timer
         if (segmentTargets.Count == 0)
         {
             IsWaiting = true;
             SetWalking(false);
 
-            // ✅ 1-4-7-10'da ise Y = 90°'a dön
             if (CurrentWaypoint1Based % 3 == 1)
             {
                 RotateToBoard();
@@ -78,9 +75,7 @@ public class TeacherMovement : MonoBehaviour
             return;
         }
 
-        /* =======================
-           HAREKET DURUMU
-        ======================= */
+        //Movement Control
         Vector3 target = segmentTargets.Peek();
         target.y = transform.position.y;
 
@@ -109,10 +104,7 @@ public class TeacherMovement : MonoBehaviour
             moveSpeed * Time.deltaTime
         );
     }
-
-    /* =======================
-       L PATH
-    ======================= */
+    //L path
     void BuildLPath(Vector3 final)
     {
         Vector3 start = transform.position;
@@ -144,15 +136,14 @@ public class TeacherMovement : MonoBehaviour
         }
     }
 
-    /* =======================
-       ANIMATION & ROTATION
-    ======================= */
+    //Animation and Rotation
     void SetWalking(bool walking)
     {
         if (anim != null)
             anim.SetBool("IsWalking", walking);
     }
 
+    //Rotates to the students
     void RotateToBoard()
 {
     Quaternion targetRot = Quaternion.Euler(0f, 90f, 0f);
