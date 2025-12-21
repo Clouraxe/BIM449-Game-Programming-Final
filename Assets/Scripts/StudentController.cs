@@ -15,6 +15,10 @@ public class StudentLean : MonoBehaviour
 
     Vector3 startLocalPos;
 
+    public TeacherMovement teacher;
+
+    public bool isLeaning;
+
     void Start()
     {
         startLocalPos = transform.localPosition;
@@ -22,6 +26,8 @@ public class StudentLean : MonoBehaviour
 
     void Update()
     {
+        
+
         float inputX = 0f;
         if (Input.GetKey(KeyCode.A)) inputX -= 1f;
         if (Input.GetKey(KeyCode.D)) inputX += 1f;
@@ -29,6 +35,8 @@ public class StudentLean : MonoBehaviour
         float inputY = 0f;
         if (Input.GetKey(KeyCode.W)) inputY += 1f;
         if (Input.GetKey(KeyCode.S)) inputY -= 1f;
+
+        
 
         // Yumuşatma
         leanX = Mathf.MoveTowards(
@@ -46,14 +54,22 @@ public class StudentLean : MonoBehaviour
         // 🔥 DOĞRU eksenler
         Vector3 targetLocalPos =
             startLocalPos +
-            Vector3.forward * (leanX * maxHorizontal) +   // A-D → X
-            -Vector3.right * (leanY * maxVertical);     // W-S → Y
+            Vector3.forward * (leanX * maxHorizontal) +   
+            -Vector3.right * (leanY * maxVertical);     
 
         transform.localPosition = Vector3.Lerp(
             transform.localPosition,
             targetLocalPos,
             0.25f
         );
+
+        if (Mathf.Abs(leanX) > 0.1f || Mathf.Abs(leanY) > 0.1f) isLeaning = true;
+        else isLeaning = false;
+
+        if (isLeaning && teacher.CanSeeStudent(transform))
+        {
+            teacher.SetSuspicious(transform);
+        }
     }
 
     // Teacher için

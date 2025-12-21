@@ -4,6 +4,8 @@ using System.Collections.Generic;
 public class TeacherMovement : MonoBehaviour
 {
     public RouteCalculator routeGrid;
+    public ScreenAlert screenAlert;
+
     public Transform patrolPointsParent;
 
     public float moveSpeed = 2f;
@@ -22,6 +24,15 @@ public class TeacherMovement : MonoBehaviour
     public bool IsWaiting { get; private set; }
     public int CurrentWaypoint1Based { get; private set; }  // 1..12
 
+    public enum TeacherState
+    {
+        Patrolling,
+        Suspicious
+    }
+
+    public TeacherState State { get; private set; } = TeacherState.Patrolling;
+
+    Transform suspiciousTarget;
     void Start()
     {
         IsWaiting = true;
@@ -39,9 +50,22 @@ public class TeacherMovement : MonoBehaviour
 
         System.Array.Sort(points, (a, b) => a.name.CompareTo(b.name));
     }
-
+    bool alreadyCaught = false;
     void Update()
     {
+
+        if (State == TeacherState.Suspicious)
+        {
+            LookAtStudent();
+            if (!alreadyCaught)
+            {
+                alreadyCaught = true;
+                screenAlert.ShowAlert();
+            }
+
+            return;
+        }
+
         if (!canMove)
         {
             SetWalking(false);
@@ -145,13 +169,52 @@ public class TeacherMovement : MonoBehaviour
 
     //Rotates to the students
     void RotateToBoard()
-{
+    {
     Quaternion targetRot = Quaternion.Euler(0f, 90f, 0f);
     transform.rotation = Quaternion.RotateTowards(
         transform.rotation,
         targetRot,
         360f * Time.deltaTime  // derece/sn
     );
-}
+    }
+
+    public void SetSuspicious(Transform target)
+    {
+        State = TeacherState.Suspicious;
+        suspiciousTarget = target;
+        canMove = false;
+        SetWalking(false);
+    }
+
+    void LookAtStudent()
+    {
+        if (suspiciousTarget == null) return;
+
+        Vector3 dir = suspiciousTarget.position - transform.position;
+        dir.y = 0f;
+
+        if (dir.sqrMagnitude < 0.001f) return;
+
+        Quaternion rot = Quaternion.LookRotation(dir.normalized);
+        transform.rotation = Quaternion.Slerp(
+            transform.rotation,
+            rot,
+            turnSpeed * Time.deltaTime
+        );
+    }
+
+    public bool CanSeeStudent(Transform student)
+    {
+        Vector3 toStudent = student.position - transform.position;
+        toStudent.y = 0f;
+
+        float angle = Vector3.Angle(transform.forward, toStudent);
+        if (angle > 45f) return false; // görüş açısı
+
+        float dist = toStudent.magnitude;
+        if (dist > 6f) return false; // görüş mesafesi
+
+        return true;
+    }
 
 }
