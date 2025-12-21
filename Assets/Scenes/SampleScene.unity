@@ -3527,6 +3527,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameTimer: {fileID: 212198175}
+  taskBarUI: {fileID: 590047946}
 --- !u!1001 &1724004083
 PrefabInstance:
   m_ObjectHideFlags: 0
