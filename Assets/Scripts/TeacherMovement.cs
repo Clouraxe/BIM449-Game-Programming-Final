@@ -5,6 +5,9 @@ public class TeacherMovement : MonoBehaviour
 {
     public RouteCalculator routeGrid;
     public ScreenAlert screenAlert;
+    public Transform student;
+    public CameraController studentCamera;
+    
 
     public Transform patrolPointsParent;
 
@@ -12,6 +15,8 @@ public class TeacherMovement : MonoBehaviour
     public float turnSpeed = 8f;
     public float arriveDistance = 0.2f;
     public float waitTimeAtPoint = 1f;
+
+    public int life = 3;
 
     public bool canMove = true;
 
@@ -50,17 +55,23 @@ public class TeacherMovement : MonoBehaviour
 
         System.Array.Sort(points, (a, b) => a.name.CompareTo(b.name));
     }
-    bool alreadyCaught = false;
+    public bool alreadyCaught = false;
     void Update()
     {
 
         if (State == TeacherState.Suspicious)
         {
             LookAtStudent();
-            if (!alreadyCaught)
+            studentCamera.LookAtTeacher(transform);
+
+            if (life > 0 && !alreadyCaught)
             {
                 alreadyCaught = true;
-                screenAlert.ShowAlert();
+                StartCoroutine(screenAlert.AlertRoutine());
+
+                GoToStudent(student);
+
+                life--;
             }
 
             return;
@@ -215,6 +226,18 @@ public class TeacherMovement : MonoBehaviour
         if (dist > 6f) return false; // görüş mesafesi
 
         return true;
+    }
+
+    public void GoToStudent(Transform student)
+    {
+        segmentTargets.Clear();
+        waitTimer = 0f;
+        IsWaiting = false;
+
+        Vector3 target = student.position;
+        target.y = transform.position.y;
+
+        BuildLPath(target);
     }
 
 }

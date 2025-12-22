@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class ScreenAlert : MonoBehaviour
@@ -7,6 +8,7 @@ public class ScreenAlert : MonoBehaviour
 
     public float fadeSpeed = 2f;
     float targetAlpha = 0f;
+    public float showDuration = 1.0f;
 
     void Awake()
     {
@@ -19,6 +21,8 @@ public class ScreenAlert : MonoBehaviour
         Color c = img.color;
         c.a = Mathf.MoveTowards(c.a, targetAlpha, fadeSpeed * Time.deltaTime);
         img.color = c;
+
+
     }
 
     public void ShowAlert()
@@ -30,4 +34,14 @@ public class ScreenAlert : MonoBehaviour
     {
         targetAlpha = 0f;
     }
+
+    public IEnumerator AlertRoutine()
+    {
+        ShowAlert();
+
+        yield return new WaitForSeconds(1f); // ⏱ 1 saniye bekle
+
+        HideAlert();
+    }
+
 }
