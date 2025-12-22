@@ -27,7 +27,7 @@ public class StudentLean : MonoBehaviour
     void Update()
     {
 
-        if (!teacher.alreadyCaught)
+        if (!teacher.studentFreeze)
         {
             float inputX = 0f;
             if (Input.GetKey(KeyCode.A)) inputX -= 1f;

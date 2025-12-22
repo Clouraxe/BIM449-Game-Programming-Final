@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 public class TeacherMovement : MonoBehaviour
@@ -7,8 +8,7 @@ public class TeacherMovement : MonoBehaviour
     public ScreenAlert screenAlert;
     public Transform student;
     public CameraController studentCamera;
-    
-
+    public LifeUIController lifeUI;
     public Transform patrolPointsParent;
 
     public float moveSpeed = 2f;
@@ -17,7 +17,6 @@ public class TeacherMovement : MonoBehaviour
     public float waitTimeAtPoint = 1f;
 
     public int life = 3;
-
     public bool canMove = true;
 
     Animator anim;
@@ -27,7 +26,7 @@ public class TeacherMovement : MonoBehaviour
     float waitTimer = 0f;
 
     public bool IsWaiting { get; private set; }
-    public int CurrentWaypoint1Based { get; private set; }  // 1..12
+    public int CurrentWaypoint1Based { get; private set; }
 
     public enum TeacherState
     {
@@ -38,11 +37,9 @@ public class TeacherMovement : MonoBehaviour
     public TeacherState State { get; private set; } = TeacherState.Patrolling;
 
     Transform suspiciousTarget;
-    void Start()
-    {
-        IsWaiting = true;
-        CurrentWaypoint1Based = 1; // başlangıç varsayımı
-    }
+
+    public bool alreadyCaught = false;     // öğrenci dokunulmazlık
+    bool handlingCatch = false;     // aynı yakalamayı tekrar tetiklemesin
 
     void Awake()
     {
@@ -55,44 +52,41 @@ public class TeacherMovement : MonoBehaviour
 
         System.Array.Sort(points, (a, b) => a.name.CompareTo(b.name));
     }
-    public bool alreadyCaught = false;
+
+    void Start()
+    {
+        IsWaiting = true;
+        CurrentWaypoint1Based = 1;
+    }
+
     void Update()
     {
-
+        // 🟥 ŞÜPHELİ DURUM
         if (State == TeacherState.Suspicious)
         {
             LookAtStudent();
             studentCamera.LookAtTeacher(transform);
 
-            if (life > 0 && !alreadyCaught)
+            if (!handlingCatch && !alreadyCaught && life > 0)
             {
-                alreadyCaught = true;
-                StartCoroutine(screenAlert.AlertRoutine());
-
-                GoToStudent(student);
-
-                life--;
+                handlingCatch = true;
+                StartCoroutine(CatchSequence());
             }
 
             return;
         }
 
+        // 🟦 YÜRÜME KONTROLÜ
         if (!canMove)
         {
             SetWalking(false);
             return;
         }
 
-        //Sleep timer
         if (segmentTargets.Count == 0)
         {
             IsWaiting = true;
             SetWalking(false);
-
-            if (CurrentWaypoint1Based % 3 == 1)
-            {
-                RotateToBoard();
-            }
 
             waitTimer += Time.deltaTime;
             if (waitTimer < waitTimeAtPoint)
@@ -110,7 +104,6 @@ public class TeacherMovement : MonoBehaviour
             return;
         }
 
-        //Movement Control
         Vector3 target = segmentTargets.Peek();
         target.y = transform.position.y;
 
@@ -121,13 +114,12 @@ public class TeacherMovement : MonoBehaviour
             return;
         }
 
-        IsWaiting = false;
         SetWalking(true);
 
         Vector3 dir = target - transform.position;
         dir.y = 0f;
 
-        if (dir.sqrMagnitude > 0.0001f)
+        if (dir.sqrMagnitude > 0.001f)
         {
             Quaternion rot = Quaternion.LookRotation(dir.normalized);
             transform.rotation = Quaternion.Slerp(transform.rotation, rot, turnSpeed * Time.deltaTime);
@@ -139,7 +131,37 @@ public class TeacherMovement : MonoBehaviour
             moveSpeed * Time.deltaTime
         );
     }
-    //L path
+
+    public bool studentFreeze = false;
+    // 🧠 YAKALANMA AKIŞI
+    IEnumerator CatchSequence()
+    {
+        studentFreeze = true;
+        // can düş
+        lifeUI.LoseLife();
+        life--;
+
+        StartCoroutine(screenAlert.AlertRoutine());
+
+        // hoca bakarak 3 saniye beklesin
+        canMove = false;
+        yield return new WaitForSeconds(3f);
+        studentFreeze = false;
+
+        // tekrar yürüsün
+        State = TeacherState.Patrolling;
+        suspiciousTarget = null;
+        canMove = true;
+
+        // 3 saniye dokunulmazlık
+        alreadyCaught = true;
+        yield return new WaitForSeconds(3f);
+        alreadyCaught = false;
+
+        handlingCatch = false;
+    }
+
+    // 📐 L PATH
     void BuildLPath(Vector3 final)
     {
         Vector3 start = transform.position;
@@ -171,32 +193,34 @@ public class TeacherMovement : MonoBehaviour
         }
     }
 
-    //Animation and Rotation
     void SetWalking(bool walking)
     {
         if (anim != null)
             anim.SetBool("IsWalking", walking);
     }
 
-    //Rotates to the students
-    void RotateToBoard()
-    {
-    Quaternion targetRot = Quaternion.Euler(0f, 90f, 0f);
-    transform.rotation = Quaternion.RotateTowards(
-        transform.rotation,
-        targetRot,
-        360f * Time.deltaTime  // derece/sn
-    );
-    }
-
     public void SetSuspicious(Transform target)
     {
+        if (alreadyCaught) return;
+
         State = TeacherState.Suspicious;
         suspiciousTarget = target;
         canMove = false;
         SetWalking(false);
     }
+    public bool CanSeeStudent(Transform student)
+    {
+        Vector3 toStudent = student.position - transform.position;
+        toStudent.y = 0f;
 
+        float angle = Vector3.Angle(transform.forward, toStudent);
+        if (angle > 45f) return false; // görüş açısı
+
+        float dist = toStudent.magnitude;
+        if (dist > 6f) return false; // görüş mesafesi
+
+        return true;
+    }
     void LookAtStudent()
     {
         if (suspiciousTarget == null) return;
@@ -213,31 +237,5 @@ public class TeacherMovement : MonoBehaviour
             turnSpeed * Time.deltaTime
         );
     }
-
-    public bool CanSeeStudent(Transform student)
-    {
-        Vector3 toStudent = student.position - transform.position;
-        toStudent.y = 0f;
-
-        float angle = Vector3.Angle(transform.forward, toStudent);
-        if (angle > 45f) return false; // görüş açısı
-
-        float dist = toStudent.magnitude;
-        if (dist > 6f) return false; // görüş mesafesi
-
-        return true;
-    }
-
-    public void GoToStudent(Transform student)
-    {
-        segmentTargets.Clear();
-        waitTimer = 0f;
-        IsWaiting = false;
-
-        Vector3 target = student.position;
-        target.y = transform.position.y;
-
-        BuildLPath(target);
-    }
-
 }
+
