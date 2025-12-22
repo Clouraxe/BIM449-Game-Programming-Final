@@ -37,6 +37,7 @@ public class PlayerInteractor : MonoBehaviour
                     ClearSelection();
                     target.materials[^1].color = new Color(1f, 1f, 0f, 0.75f);
                     selectedObject = target;
+                    target.GetComponent<CheatMethod>()?.StartCheating();
                 }
 
                 // 3. Check for Click (Left Mouse Button)
@@ -55,7 +56,7 @@ public class PlayerInteractor : MonoBehaviour
         if (selectedObject == null) return;
         
         selectedObject.materials[^1].color = new Color(1f, 1f, 0f, 0f);
+        selectedObject.GetComponent<CheatMethod>()?.StopCheating();
         selectedObject = null;
-        
     }
 }
