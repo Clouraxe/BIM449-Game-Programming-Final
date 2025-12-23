@@ -41,6 +41,12 @@ public class LifeUIController : MonoBehaviour
 
         lostCount++;
         currentLife--;
+        
+        if (currentLife <= 0)
+        {
+            Debug.Log("No lives left!");
+            Invoke(nameof(TriggerGameOver), moveTime + 1.5f);
+        }
     }
 
     IEnumerator LifeLostRoutine(int lifeIndex)
@@ -93,5 +99,10 @@ public class LifeUIController : MonoBehaviour
                 Vector2.Lerp(start, target, Mathf.SmoothStep(0, 1, t));
             yield return null;
         }
+    }
+    
+    void TriggerGameOver()
+    {
+        GameManager.Instance.Gameover();
     }
 }

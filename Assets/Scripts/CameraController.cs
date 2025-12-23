@@ -20,7 +20,7 @@ public class CameraController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (isLocked) return; // 👈 KİLİT
+        if (isLocked || GameManager.isGameOver) return; // 👈 KİLİT
 
         rotation.y += Input.GetAxis("Mouse X") * lookSpeed;
         rotation.x += -Input.GetAxis("Mouse Y") * lookSpeed;

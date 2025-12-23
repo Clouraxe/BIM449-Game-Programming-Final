@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
     public Timer gameTimer;
     public ProgressBar taskBar;
     public ProgressBar cheatBar;
+    public RectTransform gameOverPanel;
+    
+    public static bool isGameOver = false;
     
     
     void Awake() //Singleton creation
@@ -17,7 +20,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -31,7 +33,9 @@ public class GameManager : MonoBehaviour
         taskBar.ProgressCompleted += OnTaskBarCompleted;
         gameTimer.StartTimer();
         
+        gameOverPanel.gameObject.SetActive(false);
         cheatBar.transform.parent.gameObject.SetActive(false);
+        isGameOver = false;
     }
     
     void FinishTask()
@@ -42,11 +46,27 @@ public class GameManager : MonoBehaviour
     private void OnTimeExpired(object sender, EventArgs e)
     {
         Debug.Log("Game Over! Time has expired.");
+        Gameover();
     }
 
     void OnTaskBarCompleted(object sender, EventArgs e)
     {
         Debug.Log("You won!");
+    }
+
+    public void RestartGame() //Called by UI Button
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
+    
+    public void Gameover()
+    {
+        gameOverPanel.gameObject.SetActive(true);
+        Cursor.lockState = CursorLockMode.None; //FREE THE MOUSE
+        Cursor.visible = true;
+        isGameOver = true;
+        
+        gameTimer.StopTimer();
     }
 
 
