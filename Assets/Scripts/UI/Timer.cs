@@ -57,10 +57,15 @@ public class Timer : MonoBehaviour
         
         timerText.color = Color.red;
     }
-    
+
     public void StartTimer()
     {
         IsRunning = true;
+    }
+    
+    public void StopTimer()
+    {
+        IsRunning = false;
     }
     
 }

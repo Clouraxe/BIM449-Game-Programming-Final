@@ -62,7 +62,6 @@ public abstract class CheatMethod : MonoBehaviour
     {
         if (!isCheating) return;
         
-        Debug.Log("StopCheating called");
         isCheating = false;
         isPlayerCheating = false;
         timePassed = 0f;
