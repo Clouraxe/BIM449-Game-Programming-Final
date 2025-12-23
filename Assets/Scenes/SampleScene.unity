@@ -2811,6 +2811,7 @@ MonoBehaviour:
   screenAlert: {fileID: 1763530555}
   student: {fileID: 24487572}
   studentCamera: {fileID: 330585548}
+  lifeUI: {fileID: 930358566}
   patrolPointsParent: {fileID: 1077329169}
   moveSpeed: 1.5
   turnSpeed: 4
@@ -2819,6 +2820,7 @@ MonoBehaviour:
   life: 3
   canMove: 1
   alreadyCaught: 0
+  studentFreeze: 0
 --- !u!1 &1075431480
 GameObject:
   m_ObjectHideFlags: 0
