@@ -14,4 +14,25 @@ public class CheatStudentPaper : CheatMethod
     {
         base.Update();
     }
+
+    public override void OnLook()
+    {
+        StartCheating();
+    }
+    
+    public override void OnUnlook()
+    {
+        StopCheating();
+    }
+
+    public override void OnClick()
+    {
+        // No action on click for student paper
+    }
+    
+    public override void OnUnclick()
+    {
+        // No action on unclick for student paper
+    }
+    
 }

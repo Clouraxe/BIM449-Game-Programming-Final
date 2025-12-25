@@ -4,7 +4,8 @@ using UnityEngine;
 public abstract class CheatMethod : MonoBehaviour
 {
 
-    public float timeToCheat;
+    public float timeToCheat; //How long it takes to complete the cheat
+    public int cheatPoints = 1; //How many points this cheat gives
     private float timePassed = 0f;
     private bool isCheating = false;
     private ProgressBar cheatBar;
@@ -57,14 +58,20 @@ public abstract class CheatMethod : MonoBehaviour
         cheatBar.SetMax(timeToCheat);
         CheatStarted?.Invoke(this, EventArgs.Empty);
     }
-    
+
     public void StopCheating()
     {
         if (!isCheating) return;
-        
+
         isCheating = false;
         isPlayerCheating = false;
         timePassed = 0f;
         CheatFailed?.Invoke(this, EventArgs.Empty);
     }
+
+
+    public abstract void OnLook();
+    public abstract void OnUnlook();
+    public abstract void OnClick();
+    public abstract void OnUnclick();
 }

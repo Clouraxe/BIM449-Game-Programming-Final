@@ -38,9 +38,9 @@ public class GameManager : MonoBehaviour
         isGameOver = false;
     }
     
-    void FinishTask()
+    void FinishTask(int points = 1)
     {
-        taskBar.SetValue(taskBar.GetValue() + 1);
+        taskBar.SetValue(taskBar.GetValue() + points);
     }
 
     private void OnTimeExpired(object sender, EventArgs e)
@@ -86,6 +86,6 @@ public class GameManager : MonoBehaviour
         Debug.Log("Cheat Completed Successfully!");
         OnCheatFailed(this, EventArgs.Empty);
         
-        FinishTask();
+        FinishTask(((CheatMethod)sender).cheatPoints);
     }
 }

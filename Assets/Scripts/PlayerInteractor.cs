@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UIElements;
 
 public class PlayerInteractor : MonoBehaviour
 {
@@ -8,10 +9,11 @@ public class PlayerInteractor : MonoBehaviour
     [SerializeField] private float interactRange = 3f;
     [SerializeField] private LayerMask interactLayer;
     [SerializeField] private Transform holdPoint;
-    
+
     private Camera cam;
     private Renderer selectedObject;
     private GameObject grabbedObject;
+    private Renderer clickedObject;
 
     [Header("Trajectory Settings")]
     [SerializeField] private LineRenderer lineRenderer;
@@ -36,21 +38,22 @@ public class PlayerInteractor : MonoBehaviour
             grabbedObject.transform.position = holdPoint.position;
             grabbedObject.transform.rotation = holdPoint.rotation;
 
-            if (Input.GetMouseButtonDown(0)) 
+            if (Input.GetMouseButtonDown(0))
             {
                 ThrowObject();
             }
 
             // Drop with E
-            if (Input.GetKeyDown(KeyCode.E)){ 
+            if (Input.GetKeyDown(KeyCode.E))
+            {
                 DropObject();
             }
-            return; 
+            return;
         }
         else
         {
             // Hide line when not holding anything
-            if(lineRenderer != null) lineRenderer.enabled = false;
+            if (lineRenderer != null) lineRenderer.enabled = false;
         }
         // --- 2. Raycast Logic ---
         Ray ray = new Ray(cam.transform.position, cam.transform.forward);
@@ -63,39 +66,41 @@ public class PlayerInteractor : MonoBehaviour
                 // Only process if looking at a NEW object
                 if (selectedObject != target)
                 {
-                    ClearSelection(); // Reset the previous object first
-                    selectedObject = target;
-
-                    // STEP 1: Save the ORIGINAL colors FIRST (Before changing anything!)
-                    originalColors = new Color[selectedObject.materials.Length];
-                    for (int i = 0; i < selectedObject.materials.Length; i++)
-                    {
-                        originalColors[i] = selectedObject.materials[i].color;
-                    }
-
-                    // STEP 2: Apply Yellow Highlight
-                    // We loop through all materials to make the whole object glow
-                    foreach (Material mat in selectedObject.materials)
-                    {
-                        // Use 0.5f alpha for a softer highlight
-                        mat.color = new Color(1f, 1f, 0f, 0.5f); 
-                    }
-
-                    selectedObject.GetComponent<CheatMethod>()?.StartCheating();
+                    SelectObject(target);
+                    if (target.TryGetComponent(out CheatMethod cheatMethodd)) cheatMethodd.OnLook(); // Notify the cheat method that it's being looked at
                 }
 
                 // GRAB LOGIC (Left Click or E)
                 // Added "OR E" because your drop uses E
-                if ((Input.GetMouseButtonDown(0)) && hit.collider.CompareTag("grabbable"))
+                if (Input.GetMouseButtonDown(0) && hit.collider.CompareTag("grabbable"))
                 {
                     GrabObject(hit.collider.gameObject);
                 }
+
+                if (target.TryGetComponent(out CheatMethod cheatMethod))
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        clickedObject = target;
+                        cheatMethod.OnClick(); // Notify the cheat method that it's been clicked
+                    }
+                }
+
             }
             else ClearSelection();
         }
         else ClearSelection();
-    }
 
+        if (Input.GetMouseButtonUp(0) && clickedObject != null) // On mouse release
+        {
+            if (clickedObject.TryGetComponent(out CheatMethod cheatMethod))
+            {
+                cheatMethod.OnUnclick(); // Notify the cheat method that it's been unclicked
+                clickedObject = null;
+            }
+        }
+    }
+    
     void GrabObject(GameObject obj)
     {
         grabbedObject = obj;
@@ -103,7 +108,7 @@ public class PlayerInteractor : MonoBehaviour
         if (rb != null)
         {
             rb.useGravity = false;
-            rb.isKinematic = true; 
+            rb.isKinematic = true;
         }
         ClearSelection(); // Reset color so it looks normal in hand
     }
@@ -119,8 +124,8 @@ public class PlayerInteractor : MonoBehaviour
             rb.isKinematic = false;
         }
         grabbedObject = null;
-    }
-    
+        }
+
     void ThrowObject()
     {
         if (grabbedObject == null) return;
@@ -164,21 +169,45 @@ public class PlayerInteractor : MonoBehaviour
         for (int i = 0; i < linePoints; i++)
         {
             // Calculate time based on the index
-            float time = i * timeBetweenPoints; 
+            float time = i * timeBetweenPoints;
 
             // Physics Formula: Origin + (Velocity * time) + (Gravity * time^2 / 2)
             Vector3 point = startPosition + (startVelocity * time) + (Physics.gravity * 0.5f * time * time);
-            
+
             // Now 'i' is guaranteed to be safe
             lineRenderer.SetPosition(i, point);
-            
+
             // Collision Check (Optional: Cut the line if it hits the floor)
-            if(point.y < 0) 
+            if (point.y < 0)
             {
                 lineRenderer.positionCount = i + 1; // Trim the excess points
                 break; // Stop drawing
             }
         }
+    }
+
+
+    void SelectObject(Renderer obj)
+    {
+        ClearSelection(); // Clear previous selection
+
+        selectedObject = obj;
+
+        // SAVE original colors
+        originalColors = new Color[selectedObject.materials.Length];
+        for (int i = 0; i < selectedObject.materials.Length; i++)
+        {
+            originalColors[i] = selectedObject.materials[i].color;
+        }
+
+        // APPLY yellow highlight
+        foreach (Material mat in selectedObject.materials)
+        {
+            mat.color = new Color(1f, 1f, 0f, 0.5f); // Yellow with 0.5f alpha
+        }
+
+
+
     }
 
     void ClearSelection()
@@ -195,9 +224,9 @@ public class PlayerInteractor : MonoBehaviour
             }
         }
 
-        // Stop cheating BEFORE we set selectedObject to null
-        selectedObject.GetComponent<CheatMethod>()?.StopCheating();
-        
+        if (selectedObject.TryGetComponent(out CheatMethod cheatMethod)) cheatMethod.OnUnlook(); // Notify the cheat method that it's no longer being looked at
+
         selectedObject = null;
     }
+        
 }
