@@ -676,6 +676,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheatStudentPaper
   timeToCheat: 3
+  cheatPoints: 1
 --- !u!1 &158171442 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 798391424012036445, guid: 991e8973513e2ad408232c1afeb3a9df, type: 3}
@@ -1809,6 +1810,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheatStudentPaper
   timeToCheat: 3
+  cheatPoints: 1
 --- !u!1001 &524853191
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2043,6 +2045,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheatPhone
   timeToCheat: 5
+  cheatPoints: 3
   phoneModel: {fileID: 643153135}
   phoneHoldPoint: {fileID: 1417075683}
 --- !u!65 &559666652
@@ -2236,6 +2239,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheatStudentPaper
   timeToCheat: 3
+  cheatPoints: 1
 --- !u!1001 &573761752
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2780,6 +2784,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheatStudentPaper
   timeToCheat: 3
+  cheatPoints: 1
 --- !u!1001 &783880782
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3570,6 +3575,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CheatStudentPaper
   timeToCheat: 3
+  cheatPoints: 1
 --- !u!1001 &958202281
 PrefabInstance:
   m_ObjectHideFlags: 0
