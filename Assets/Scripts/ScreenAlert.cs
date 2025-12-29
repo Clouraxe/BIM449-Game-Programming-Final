@@ -37,6 +37,7 @@ public class ScreenAlert : MonoBehaviour
 
     public IEnumerator AlertRoutine()
     {
+        GameManager.Instance.PlayCaughtSound();
         ShowAlert();
 
         yield return new WaitForSeconds(1f); // ⏱ 1 saniye bekle
