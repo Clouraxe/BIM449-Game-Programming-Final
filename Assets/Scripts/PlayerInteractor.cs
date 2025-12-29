@@ -13,6 +13,7 @@ public class PlayerInteractor : MonoBehaviour
     private Renderer selectedObject;
     private GameObject grabbedObject;
     private Renderer clickedObject;
+    public EraserDistraction eraser;
 
     [Header("Trajectory Settings")]
     [SerializeField] private LineRenderer lineRenderer;
@@ -60,41 +61,42 @@ public class PlayerInteractor : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit, interactRange, interactLayer))
         {
-            if (hit.collider.TryGetComponent<Renderer>(out Renderer target))
+            // 🛠️ DÜZELTME: Renderer'ı önce çarptığımız objede, yoksa çocuklarında ara
+            Renderer target = hit.collider.GetComponent<Renderer>();
+            if (target == null) target = hit.collider.GetComponentInChildren<Renderer>();
+
+            // Eğer target bulunduysa işleme devam et
+            if (target != null)
             {
                 if (selectedObject != target)
                 {
                     SelectObject(target);
-                    if (target.TryGetComponent(out CheatMethod cheatMethodd)) cheatMethodd.OnLook(); 
+                    if (target.TryGetComponent(out CheatMethod cheatMethodd)) cheatMethodd.OnLook();
                 }
 
                 // --- TUTMA (GRAB) KISMI ---
+                // Etiket kontrolünü çarptığımız Collider üzerinden yapıyoruz
                 if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.E)) && hit.collider.CompareTag("grabbable"))
                 {
                     GrabObject(hit.collider.gameObject);
                 }
 
-                if (target.TryGetComponent(out CheatMethod cheatMethod))
+                // CheatMethod kontrolü (Hem babada hem çocukta olabilir, ikisine de bakıyoruz)
+                CheatMethod cheatMethod = hit.collider.GetComponent<CheatMethod>();
+                if (cheatMethod == null) cheatMethod = hit.collider.GetComponentInChildren<CheatMethod>();
+
+                if (cheatMethod != null)
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
                         clickedObject = target;
-                        cheatMethod.OnClick(); 
+                        cheatMethod.OnClick();
                     }
                 }
             }
             else ClearSelection();
         }
         else ClearSelection();
-
-        if (Input.GetMouseButtonUp(0) && clickedObject != null) 
-        {
-            if (clickedObject.TryGetComponent(out CheatMethod cheatMethod))
-            {
-                cheatMethod.OnUnclick(); 
-                clickedObject = null;
-            }
-        }
     }
     
     void GrabObject(GameObject obj)
@@ -121,6 +123,7 @@ public class PlayerInteractor : MonoBehaviour
         PlayInteractionSound(grabbedObject);
         // -----------------------------------------
 
+
         Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
         if (rb != null)
         {
@@ -134,17 +137,27 @@ public class PlayerInteractor : MonoBehaviour
     {
         if (grabbedObject == null) return;
 
-        // --- FIRLATMA SESİ KISMI (Yeni Eklenen) ---
         PlayInteractionSound(grabbedObject);
-        // ------------------------------------------
 
         Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
         Collider col = grabbedObject.GetComponent<Collider>();
+
+        // 1. Dinamik Kontrol: Fırlatılan nesnenin içinde EraserDistraction var mı?
+        if (grabbedObject.TryGetComponent(out EraserDistraction distraction))
+        {
+            distraction.Throw();
+        }
+
+        // HATA OLABİLECEK SATIR: eraser.Throw(); 
+        // Bunu siliyoruz çünkü yukarıdaki TryGetComponent zaten bu işi yapıyor.
+        // Eğer inspector'dan atadığın özel bir referans varsa null kontrolü yapmalısın:
+        if (eraser != null) eraser.Throw();
 
         if (rb != null)
         {
             rb.useGravity = true;
             rb.isKinematic = false;
+            rb.AddForce(cam.transform.forward * throwForce, ForceMode.Impulse);
         }
 
         if (col != null)
@@ -152,13 +165,8 @@ public class PlayerInteractor : MonoBehaviour
             col.enabled = true;
         }
 
-        if (rb != null)
-        {
-            rb.AddForce(cam.transform.forward * throwForce, ForceMode.Impulse);
-        }
-
         grabbedObject = null;
-    }
+    }   
 
     // Kod tekrarını önlemek için sesi çalan özel bir yardımcı fonksiyon yazdım
     void PlayInteractionSound(GameObject obj)
