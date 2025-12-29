@@ -56,7 +56,12 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame() //Called by UI Button
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    }
+    
+    public void OnBackToMenu() //Called by UI Button
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("MainMenu");
     }
     
     public void Gameover()
