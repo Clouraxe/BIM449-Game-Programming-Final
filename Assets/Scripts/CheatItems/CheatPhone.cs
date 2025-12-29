@@ -19,6 +19,8 @@ public class CheatPhone : CheatMethod
         originalColors = new Color[phoneModel.childCount];
         initialPosition = transform.position;
 
+        CheatCompleted += (sender, e) => OnUnclick();
+
         // Hocayı sahnede otomatik bul (Eğer elle atamadıysan)
         if (teacher == null) teacher = FindFirstObjectByType<TeacherMovement>();
 

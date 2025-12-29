@@ -97,6 +97,15 @@ public class PlayerInteractor : MonoBehaviour
             else ClearSelection();
         }
         else ClearSelection();
+        
+        if (Input.GetMouseButtonUp(0) && clickedObject != null) // On mouse release
+        {
+            if (clickedObject.TryGetComponent(out CheatMethod cheatMethod))
+            {
+                cheatMethod.OnUnclick(); // Notify the cheat method that it's been unclicked
+                clickedObject = null;
+            }
+        }
     }
     
     void GrabObject(GameObject obj)
