@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public ProgressBar taskBar;
     public ProgressBar cheatBar;
     public RectTransform gameOverPanel;
+    public RectTransform winPanel;
     
     public static bool isGameOver = false;
     
@@ -32,8 +33,9 @@ public class GameManager : MonoBehaviour
         gameTimer.TimeExpired += OnTimeExpired;
         taskBar.ProgressCompleted += OnTaskBarCompleted;
         gameTimer.StartTimer();
-        
+
         gameOverPanel.gameObject.SetActive(false);
+        winPanel.gameObject.SetActive(false);
         cheatBar.transform.parent.gameObject.SetActive(false);
         isGameOver = false;
     }
@@ -51,7 +53,14 @@ public class GameManager : MonoBehaviour
 
     void OnTaskBarCompleted(object sender, EventArgs e)
     {
-        Debug.Log("You won!");
+        if (isGameOver) return;
+        
+        winPanel.gameObject.SetActive(true);
+        Cursor.lockState = CursorLockMode.None; //FREE THE MOUSE
+        Cursor.visible = true;
+        isGameOver = true;
+        
+        gameTimer.StopTimer();
     }
 
     public void RestartGame() //Called by UI Button
@@ -66,6 +75,7 @@ public class GameManager : MonoBehaviour
     
     public void Gameover()
     {
+        if (isGameOver) return;
         gameOverPanel.gameObject.SetActive(true);
         Cursor.lockState = CursorLockMode.None; //FREE THE MOUSE
         Cursor.visible = true;
@@ -88,7 +98,6 @@ public class GameManager : MonoBehaviour
     
     public void OnCheatCompleted(object sender, EventArgs e)
     {
-        Debug.Log("Cheat Completed Successfully!");
         OnCheatFailed(this, EventArgs.Empty);
         
         FinishTask(((CheatMethod)sender).cheatPoints);
