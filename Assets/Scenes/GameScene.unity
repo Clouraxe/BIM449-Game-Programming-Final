@@ -998,11 +998,11 @@ RectTransform:
   - {fileID: 1774569322}
   m_Father: {fileID: 1579627702}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -355.2, y: -275}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 13, y: 13}
   m_SizeDelta: {x: 200, y: 35}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 0}
 --- !u!1 &212198173
 GameObject:
   m_ObjectHideFlags: 0
@@ -2251,7 +2251,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: You won!
+  m_Text: You passed!
 --- !u!222 &403131331
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2991,7 +2991,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.6356964, y: 14.3216}
+  m_AnchoredPosition: {x: -0.63568115, y: 14.3216}
   m_SizeDelta: {x: 13.985, y: 41.3569}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &549588216
@@ -7856,7 +7856,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: GAME OVER
+  m_Text: You Failed!
 --- !u!222 &1539990107
 CanvasRenderer:
   m_ObjectHideFlags: 0
